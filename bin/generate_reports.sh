@@ -186,7 +186,7 @@ curl --user elastic:changeme -XGET "http://localhost:9200/pcawg-r1/file_object/_
 }
 ' | jq -r '.hits.hits[]._source | [.dcc_project_code, .analysis_software, .gnos_id, .file_name, .file_object_id, .donor_wgs_exclusion_white_gray] | join("\t")' >> $output_dir/index_files_missing_in_collab_existing_in_aws.txt
 
-# generate the list of index files missing from Collab existing in AWS
+# generate the list of files missing from DCC portal
 echo -e $header > $output_dir/dcc_portal_missing_files.txt
 curl --user elastic:changeme -XGET "http://localhost:9200/pcawg-r1/file_object/_search?size=3000" -d '{
     "_source": ["file_object_id", "gnos_id", "dcc_project_code", "file_name", "donor_wgs_exclusion_white_gray", "analysis_software"],
