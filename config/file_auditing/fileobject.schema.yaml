@@ -1,0 +1,117 @@
+pcawg_release_file_name: "release_may2016.v1.4.with_consensus_calls.jsonl"
+collab_object_list: "collab.object_id.txt"
+aws_object_list: "aws.object_id.txt"
+dcc_portal_object_list: "dcc.object_id.txt"
+ega_object_list: "ega_object_list.tsv"
+pdc_object_list: "pdc_object_list.tsv"
+help_file_name: "pcawg_sample_sheet.tsv"
+annotations_path: /Users/lxiang/projects/pcawg-operations/lists/
+pcawg_ega_submission_path: /Users/lxiang/projects/pancan/pancancer-sandbox/pcawg-ega-submission
+output_file_name: "fileobject.jsonl"
+overall_report_file_name: "overall_report.txt"
+
+
+root_fields_map:
+    submitter_donor_id: "submitter_donor_id"
+    dcc_project_code: "dcc_project_code"
+    icgc_donor_id: "icgc_donor_id"
+    gnos_id: "analysis_id"
+    donor_wgs_exclusion_white_gray: "wgs_exclusion_white_gray"
+    donor_unique_id: "donor_unique_id"
+
+
+target_schema:
+    fileobject:
+        dcc_project_code:
+        donor_unique_id:
+        submitter_donor_id:
+        icgc_donor_id:
+        donor_wgs_exclusion_white_gray:
+        is_in_pcawg_v1_4:  
+        gnos_id: 
+        data_type: 
+        library_strategy:
+        analysis_software: 
+        file_format: 
+        file_name:
+        file_object_id:
+        file_copies: []
+        index_file_name:
+        index_file_object_id:
+        index_file_copies: []
+        meta_file_name:
+        meta_file_object_id:
+        meta_file_copies: []
+
+
+fields_path_map:
+    - wgs.normal_specimen.bwa_alignment: 
+        data_type: "Aligned Reads"
+        library_strategy: "WGS"
+        analysis_software: "BWA MEM"
+    - wgs.tumor_specimens.bwa_alignment:
+        data_type: "Aligned Reads"
+        library_strategy: "WGS"
+        analysis_software: "BWA MEM"
+    - rna_seq.normal_specimen.tophat:
+        data_type: "Aligned Reads"
+        library_strategy: "RNA-Seq"
+        analysis_software: "TopHat2"
+    - rna_seq.normal_specimen.star:
+        data_type: "Aligned Reads"
+        library_strategy: "RNA-Seq"
+        analysis_software: "STAR"
+    - rna_seq.tumor_specimens.tophat:
+        data_type: "Aligned Reads"
+        library_strategy: "RNA-Seq"
+        analysis_software: "TopHat2"
+    - rna_seq.tumor_specimens.star:
+        data_type: "Aligned Reads"
+        library_strategy: "RNA-Seq"
+        analysis_software: "STAR"
+    - wgs.tumor_specimens.dkfz_embl_variant_calling:
+        # data_type: "SSM"
+        library_strategy: "WGS"
+        analysis_software: "DKFZ/EMBL variant call pipeline"
+    - wgs.tumor_specimens.broad_variant_calling:
+        # data_type: "SSM"
+        library_strategy: "WGS"
+        analysis_software: "Broad variant call pipeline"                  
+    - wgs.tumor_specimens.sanger_variant_calling:
+        # data_type: "SSM"
+        library_strategy: "WGS"
+        analysis_software: "Sanger variant call pipeline"  
+    - wgs.tumor_specimens.muse_variant_calling:
+        # data_type: "SSM"
+        library_strategy: "WGS"
+        analysis_software: "Muse variant call pipeline"
+    - consensus_somatic_variant_calls.snv_mnv:
+        library_strategy: "WGS"
+        analysis_software: "PCWAG SNV-MNV callers"     
+    - consensus_somatic_variant_calls.indel:
+        library_strategy: "WGS"
+        analysis_software: "PCWAG InDel callers" 
+
+
+vcf_fields_type_map:
+    - somatic.snv_mnv.vcf.gz:
+        data_type: "SSM"
+    - somatic.cnv.vcf.gz:
+        data_type: "CNSM"
+    - somatic.sv.vcf.gz:
+        data_type: "StSM"
+    - somatic.indel.vcf.gz:
+        data_type: "SSM"
+    - germline.snv_mnv.vcf.gz:
+        data_type: "SGV"
+    - germline.cnv.vcf.gz:
+        data_type: "CNGV"
+    - germline.sv.vcf.gz:
+        data_type: "StGV"
+    - germline.indel.vcf.gz:
+        data_type: "SGV" 
+
+
+
+
+

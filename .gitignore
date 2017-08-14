@@ -20,7 +20,8 @@ dist
 build
 eggs
 parts
-bin
+#bin
+docs
 var
 sdist
 develop-eggs

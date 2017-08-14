@@ -30,6 +30,7 @@ def build_es(app_ctx):
 
 def build_donor(app_ctx):
 
+    click.echo('in build_donor...')
     schema = app_ctx['input_schemas']['donor']
 
     fname = os.path.join(schema['data_path'], schema['main_file_name'])
@@ -149,7 +150,8 @@ def build_donor(app_ctx):
         line = util.get_line(tsv_obj)
         with open(os.path.join(app_ctx['output_dir'], 'mirna_release.tsv'), 'a') as f:
             f.write('\t'.join(line) + '\n')
-
+    
+    click.echo('complete in build_donor...')
 
 
 def create_obj(donor_unique_id, schema, record, annotations, source):

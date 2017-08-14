@@ -5,8 +5,11 @@ import re
 import yaml
 import csv
 import click
-# from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch
 from collections import OrderedDict
+
+
+
 
 def init_app(config_file, host=None, port=None, **kwargs):
     """
@@ -19,52 +22,46 @@ def init_app(config_file, host=None, port=None, **kwargs):
     app_ctx['app'] = yaml.load(config_file)
 
     workdir = os.path.abspath(app_ctx['app']['workdir'])
+    confdir = os.path.abspath(app_ctx['app']['confdir'])
 
+    app_ctx['input_dir'] = os.path.join(workdir, 'input')
     app_ctx['output_dir'] = os.path.join(workdir, 'output')
 
     try:
-        with open(os.path.join(workdir, 'config.yaml'), 'r') as c:
+        with open(os.path.join(confdir, 'config.yaml'), 'r') as c:
             app_ctx['config'] = yaml.load(c)
     except:
-        exit('Error: please make sure config.yaml exists and readable under the specified workdir: %s' % workdir)
+        exit('Error: please make sure config.yaml exists and readable under the specified confdir: %s' % confdir)
 
-    app_ctx['input_schemas'] = get_input_schemas(workdir)
+    app_ctx['input_schemas'] = get_input_schemas(confdir)
 
-    if app_ctx['input_schemas'] and app_ctx['config']:
-        app_ctx['workdir'] = workdir
-    else:
-        exit('Not valid workdir: %s' % workdir)
+    if (host and port):
+        if host: app_ctx['config']['es.host'] = host
+        if port: app_ctx['config']['es.port'] = port
 
-    # if (host and port):
-    #     if host: app_ctx['config']['es.host'] = host
-    #     if port: app_ctx['config']['es.port'] = port
-
-    #     es_hosts = [ "%s:%s" % (app_ctx['config']['es.host'], app_ctx['config']['es.port']) ]
-    #     app_ctx['es'] = Elasticsearch(hosts=es_hosts, http_auth=('elastic', 'changeme'), **kwargs)
+        es_hosts = [ "%s:%s" % (app_ctx['config']['es.host'], app_ctx['config']['es.port']) ]
+        app_ctx['es'] = Elasticsearch(hosts=es_hosts, http_auth=('elastic', 'changeme'), **kwargs)
 
     return app_ctx
 
 
-def get_input_schemas(workdir):
-    input_dirs = next(os.walk(os.path.join(workdir, 'input')))[1]
+def get_input_schemas(confdir):
 
     schemas = {}
     file_name_pattern = re.compile('^(.+)\.schema\.yaml$')
-    for d in input_dirs:
-        d = os.path.join(workdir, 'input', d)
-        for f in os.listdir(d):
-            file_with_path = os.path.join(d, f)
-            if not os.path.isfile(file_with_path): continue
+    for f in os.listdir(confdir):
+        file_with_path = os.path.join(confdir, f)
+        if not os.path.isfile(file_with_path): continue
 
-            m = re.match(file_name_pattern, f)
-            if m and m.group(1):
-                if m.group(1) in schemas:
-                    click.echo('Schema for "%s" already defined, ignore: %s' % (m.group(1), file_with_path))
-                else:
-                    with open(file_with_path, 'r') as s:
-                        schemas[m.group(1)] = yaml.load(s)
-                        if schemas[m.group(1)]:
-                            schemas[m.group(1)]['data_path'] = d
+        m = re.match(file_name_pattern, f)
+        if m and m.group(1):
+            if m.group(1) in schemas:
+                click.echo('Schema for "%s" already defined, ignore: %s' % (m.group(1), file_with_path))
+            else:
+                with open(file_with_path, 'r') as s:
+                    schemas[m.group(1)] = yaml.load(s)
+                    # if schemas[m.group(1)]:
+                        # schemas[m.group(1)]['data_path'] = os.join(workdir, m)
 
     return schemas
 
@@ -124,7 +121,16 @@ def read_annotations(annotations, type, file_name):
                 icgc_id, id_pcawg, dcc_project_code, creation_release = str.split(line.rstrip(), ',')
                 id_pcawg = detect_and_low_case_uuid(id_pcawg)
                 annotations[type][dcc_project_code+'::'+id_pcawg] = prefix.upper()+icgc_id
-
+        
+        elif type == 'object_id_map':
+            annotations[type] = {}
+            for line in r:
+                if line.startswith('#'): continue
+                if len(line.rstrip()) == 0: continue
+                if not len(str.split(line.rstrip(), '\t')) == 3: continue
+                object_id, gnos_id, file_name = str.split(line.rstrip(), '\t')
+                annotations[type][gnos_id+'.'+file_name] = object_id
+                annotations[type][object_id] = {'gnos_id': gnos_id, 'file_name': file_name}             
 
         else:
             print('unknown annotation type: {}'.format(type))
@@ -190,3 +196,42 @@ def udf(x, y):
     elif isinstance(x, list):
         value = [udf(a,y) for a in x]
     return value
+
+def get_key_map(key):
+    key_map = {
+      "sanger": "sanger_variant_calling",
+      "dkfz": "dkfz_embl_variant_calling",
+      "embl": "dkfz_embl_variant_calling",
+      "broad": "broad_variant_calling",
+      "muse": "muse_variant_calling",
+      "broad_tar": "broad_tar_variant_calling",
+      "aligned_bam": "bwa_alignment",
+      "minibam": "minibam",
+      "https://gtrepo-bsc.annailabs.com/": "gnos_bsc",
+      "bsc": "https://gtrepo-bsc.annailabs.com/",
+      "https://gtrepo-ebi.annailabs.com/": "gnos_ebi",
+      "ebi": "https://gtrepo-ebi.annailabs.com/",
+      "https://cghub.ucsc.edu/": "gnos_cghub",
+      "cghub": "https://cghub.ucsc.edu/",
+      "https://gtrepo-dkfz.annailabs.com/": "gnos_dkfz",
+      "dkfz": "https://gtrepo-dkfz.annailabs.com/",
+      "https://gtrepo-riken.annailabs.com/": "gnos_riken",
+      "riken": "https://gtrepo-riken.annailabs.com/",
+      "https://gtrepo-osdc-icgc.annailabs.com/": "gnos_osdc-icgc",
+      "osdc-icgc": "https://gtrepo-osdc-icgc.annailabs.com/",
+      "https://gtrepo-osdc-tcga.annailabs.com/": "gnos_osdc-tcga",
+      "osdc-tcga": "https://gtrepo-osdc-tcga.annailabs.com/",
+      "https://gtrepo-etri.annailabs.com/": "gnos_etri",
+      "etri": "https://gtrepo-etri.annailabs.com/",
+      "collab": "collab",
+      "aws": "aws",
+      "dcc_portal": "dcc_portal",
+      "ega": "ega",
+      "pdc": "pdc"
+    }   
+
+    return key_map.get(key)
+
+
+
+
