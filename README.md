@@ -1,6 +1,6 @@
 # pcawg_file_audit
 The tool is used to:
-* Audit PCAWG files distributions in different repos: Collab, AWS, EGA, DCC-portal, PDC, GNOS repositories
+* Audit PCAWG files distributed among different repos: Collab, AWS, EGA, DCC-portal, PDC, GNOS repositories
 
 ## Getting Started
 The tool needs to talk to the Collaboratory, AWS S3, DCC portal API, metadata service API and EGA data transfer git repo to get latest information. 
